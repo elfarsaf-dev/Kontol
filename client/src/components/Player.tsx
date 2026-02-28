@@ -170,82 +170,69 @@ export default function Player() {
 
       {/* Right Side Panel Player */}
       <div className={cn(
-        "fixed top-1/2 -translate-y-1/2 right-4 w-72 bg-[#121212]/90 backdrop-blur-xl border border-white/10 rounded-3xl transition-all duration-500 z-50 flex flex-col shadow-2xl overflow-hidden",
-        isExpanded ? "h-[60vh] opacity-100 scale-100" : "h-0 opacity-0 scale-95 pointer-events-none"
+        "fixed top-1/2 -translate-y-1/2 right-4 w-64 bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-3xl transition-all duration-500 z-50 flex flex-col shadow-2xl overflow-hidden",
+        isExpanded ? "h-[55vh] opacity-100 scale-100" : "h-0 opacity-0 scale-95 pointer-events-none"
       )}>
         {/* Header */}
-        <div className="p-4 flex items-center justify-between border-b border-white/5">
+        <div className="p-3 flex items-center justify-between border-b border-white/5">
           <div className="flex flex-col">
-            <h3 className="font-bold text-white flex items-center gap-2">
-              <Music className="w-4 h-4 text-green-500" />
+            <h3 className="font-bold text-xs text-white flex items-center gap-2">
+              <Music className="w-3 h-3 text-green-500" />
               Now Playing
             </h3>
             <button 
               onClick={() => setShowPremiumInput(!showPremiumInput)}
               className={cn(
-                "text-[10px] flex items-center gap-1 transition-colors mt-1 px-2 py-0.5 rounded-full w-fit",
+                "text-[9px] flex items-center gap-1 transition-colors mt-0.5 px-2 py-0.5 rounded-full w-fit",
                 premiumKey ? "bg-yellow-500/20 text-yellow-500" : "bg-white/5 text-white/40 hover:text-white"
               )}
             >
-              <Crown className="w-3 h-3" />
-              {premiumKey ? "Premium Active" : "Go Premium"}
+              <Crown className="w-2.5 h-2.5" />
+              {premiumKey ? "Premium" : "Go Premium"}
             </button>
           </div>
           <button 
             onClick={() => setIsExpanded(false)}
             className="p-1 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
         {/* Premium Input Overlay */}
         {showPremiumInput && (
-          <div className="absolute top-[72px] left-0 right-0 p-4 bg-[#181818] border-b border-white/10 z-20 animate-in slide-in-from-top duration-300">
-            <div className="flex flex-col gap-3">
+          <div className="absolute top-[60px] left-0 right-0 p-3 bg-[#181818] border-b border-white/10 z-20 animate-in slide-in-from-top duration-300">
+            <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-white">
-                  {!canPlay() ? "Play Limit Reached" : "Premium API Key"}
+                <span className="text-[10px] font-bold text-white">
+                  {!canPlay() ? "Limit Reached" : "Premium Key"}
                 </span>
-                <button onClick={() => setShowPremiumInput(false)}><X className="w-4 h-4 text-white/40" /></button>
+                <button onClick={() => setShowPremiumInput(false)}><X className="w-3 h-3 text-white/40" /></button>
               </div>
-              {!canPlay() && (
-                <p className="text-[10px] text-white/60">
-                  Kamu sudah mencapai batas putar lagu hari ini (20 lagu). Upgrade ke Premium untuk putar sepuasnya!
-                </p>
-              )}
               <div className="flex gap-2">
                 <Input 
-                  placeholder="Enter API Key..." 
+                  placeholder="Key..." 
                   value={tempKey}
                   onChange={(e) => setTempKey(e.target.value)}
-                  className="h-8 bg-white/5 border-white/10 text-xs"
+                  className="h-7 bg-white/5 border-white/10 text-[10px]"
                 />
                 <Button 
                   size="sm" 
-                  className="h-8 text-xs bg-green-500 hover:bg-green-600 text-black"
+                  className="h-7 text-[10px] px-2 bg-green-500 hover:bg-green-600 text-black"
                   onClick={handleSaveKey}
                   disabled={isValidating}
                 >
                   {isValidating ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
                 </Button>
               </div>
-              <a 
-                href="https://wa.me/6283817779643?text=Halo%2C%20saya%20ingin%20mendapatkan%20API%20Key%20Premium%20untuk%20mendownload%"
-                target="_blank" 
-                className="text-[10px] text-green-500 flex items-center gap-1 hover:underline"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Get API Key via WhatsApp
-              </a>
             </div>
           </div>
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center gap-4 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col items-center gap-3 scrollbar-hide">
           {/* Cover Art */}
-          <div className="w-40 aspect-square rounded-xl overflow-hidden shadow-2xl group relative">
+          <div className="w-32 aspect-square rounded-lg overflow-hidden shadow-xl group relative">
             <img 
               src={currentTrack.image} 
               alt={currentTrack.title} 
@@ -255,26 +242,26 @@ export default function Player() {
           </div>
 
           {/* Info */}
-          <div className="w-full text-center space-y-1 relative">
+          <div className="w-full text-center space-y-0.5 relative">
             <button 
               onClick={() => toggleLike(currentTrack)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 hover:bg-white/5 rounded-full transition-colors group"
+              className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/5 rounded-full transition-colors group"
             >
               <Heart 
                 className={cn(
-                  "w-5 h-5 transition-all",
+                  "w-4 h-4 transition-all",
                   isLiked(currentTrack.link) ? "fill-red-500 text-red-500 scale-110" : "text-white/40 group-hover:text-white"
                 )} 
               />
             </button>
-            <h2 className="text-lg font-black text-white leading-tight line-clamp-1 px-8">{currentTrack.title}</h2>
-            <p className="text-sm text-white/60 font-medium hover:text-white transition-colors cursor-pointer">{currentTrack.artist}</p>
+            <h2 className="text-sm font-black text-white leading-tight line-clamp-1 px-6">{currentTrack.title}</h2>
+            <p className="text-[11px] text-white/60 font-medium hover:text-white transition-colors cursor-pointer">{currentTrack.artist}</p>
           </div>
 
           {/* Controls */}
-          <div className="w-full space-y-4">
+          <div className="w-full space-y-3">
             {/* Progress */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Slider 
                 value={[progress]} 
                 max={100} 
@@ -288,97 +275,86 @@ export default function Player() {
                 }}
                 className="w-full cursor-pointer h-1"
               />
-              <div className="flex justify-between text-[10px] font-mono text-white/40 tracking-wider">
+              <div className="flex justify-between text-[9px] font-mono text-white/40 tracking-wider">
                 <span>{audioRef.current ? Math.floor(audioRef.current.currentTime / 60) + ":" + ("0" + Math.floor(audioRef.current.currentTime % 60)).slice(-2) : "0:00"}</span>
                 <span>{audioRef.current && audioRef.current.duration ? Math.floor(audioRef.current.duration / 60) + ":" + ("0" + Math.floor(audioRef.current.duration % 60)).slice(-2) : "3:45"}</span>
               </div>
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-center gap-6">
-                <button className="text-white/40 hover:text-green-500 transition-colors"><Shuffle className="w-4 h-4" /></button>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-center gap-4">
+                <button className="text-white/40 hover:text-green-500 transition-colors"><Shuffle className="w-3.5 h-3.5" /></button>
                 <button 
                   onClick={() => {
                     // Previous track logic
                     console.log("Previous track");
                   }}
                   className="text-white/80 hover:text-white transition-colors transform active:scale-90"
-                ><SkipBack className="w-6 h-6 fill-current" /></button>
+                ><SkipBack className="w-5 h-5 fill-current" /></button>
                 <button 
                   onClick={() => setIsPlaying(!isPlaying)}
                   disabled={isLoading}
-                  className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-black shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-black shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   ) : isPlaying ? (
-                    <Pause className="w-6 h-6 fill-current" />
+                    <Pause className="w-5 h-5 fill-current" />
                   ) : (
-                    <Play className="w-6 h-6 fill-current ml-1" />
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
                   )}
                 </button>
                 <button 
                   onClick={() => playNext()}
                   className="text-white/80 hover:text-white transition-colors transform active:scale-90"
-                ><SkipForward className="w-6 h-6 fill-current" /></button>
-                <button className="text-white/40 hover:text-green-500 transition-colors"><Repeat className="w-4 h-4" /></button>
+                ><SkipForward className="w-5 h-5 fill-current" /></button>
+                <button className="text-white/40 hover:text-green-500 transition-colors"><Repeat className="w-3.5 h-3.5" /></button>
               </div>
 
               {/* Volume & Download */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2 bg-white/5 p-2 rounded-xl">
-                  <Volume2 className="w-4 h-4 text-white/40" />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-lg">
+                  <Volume2 className="w-3.5 h-3.5 text-white/40" />
                   <Slider defaultValue={[70]} max={100} step={1} className="flex-1 h-1" />
-                  <ListMusic className="w-4 h-4 text-white/40 hover:text-white cursor-pointer" />
                 </div>
                 
                 {audioUrl && (
-                  <div className="flex flex-col gap-2 w-full">
+                  <div className="flex flex-col gap-1.5 w-full">
                     {!premiumKey && (
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         <div className="flex justify-between items-center px-1">
-                          <span className="text-[10px] text-white/40">Free Plays Today</span>
+                          <span className="text-[9px] text-white/40">Plays</span>
                           <span className={cn(
-                            "text-[10px] font-bold",
+                            "text-[9px] font-bold",
                             playCount >= 20 ? "text-red-500" : "text-green-500"
                           )}>
                             {playCount}/20
                           </span>
                         </div>
-                        <div className="flex justify-between items-center px-1">
-                          <span className="text-[10px] text-white/40">Free Downloads Today</span>
-                          <span className={cn(
-                            "text-[10px] font-bold",
-                            downloadCount >= 10 ? "text-red-500" : "text-green-500"
-                          )}>
-                            {downloadCount}/10
-                          </span>
-                        </div>
                       </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                       <Button 
                         variant="outline" 
-                        className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-2 rounded-lg py-4 h-8 text-xs disabled:opacity-50"
+                        className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-1.5 rounded-md h-7 text-[10px] disabled:opacity-50"
                         onClick={() => {
                           if (canDownload()) {
                             window.open(audioUrl, '_blank');
                             if (!premiumKey) incrementDownloadCount();
                           } else {
                             setShowPremiumInput(true);
-                            // Optional: add toast notification here
                           }
                         }}
                         disabled={!canDownload() && !premiumKey}
                       >
-                        <Download className="w-4 h-4" />
-                        {canDownload() ? "Download" : "Limit Reached"}
+                        <Download className="w-3.5 h-3.5" />
+                        {canDownload() ? "Save" : "Limit"}
                       </Button>
                       {premiumKey && (
                         <Button 
                           variant="outline" 
-                          className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-2 rounded-lg py-4 h-8 text-xs font-bold"
+                          className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-1 rounded-md h-7 text-[10px] font-bold"
                           onClick={() => {
                             const finalUrl = premiumDownloadUrl || audioUrl;
                             if (finalUrl) {
@@ -392,7 +368,7 @@ export default function Player() {
                           }}
                         >
                           <Crown className="w-3 h-3" />
-                          Download(Pro)
+                          Pro
                         </Button>
                       )}
                     </div>
