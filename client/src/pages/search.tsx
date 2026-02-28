@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 
 export default function Search() {
   const [query, setQuery] = useState("");
+  const [lastSearchedQuery, setLastSearchedQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<string[]>(() => {
@@ -15,18 +16,21 @@ export default function Search() {
   });
 
   const performSearch = async (searchTerm: string) => {
-    if (!searchTerm.trim()) return;
+    const trimmed = searchTerm.trim();
+    if (!trimmed || trimmed === lastSearchedQuery) return;
+    
     setLoading(true);
+    setLastSearchedQuery(trimmed);
 
     // Save to history
     setHistory(prev => {
-      const newHistory = [searchTerm, ...prev.filter(h => h !== searchTerm)].slice(0, 10);
+      const newHistory = [trimmed, ...prev.filter(h => h !== trimmed)].slice(0, 10);
       localStorage.setItem("search_history", JSON.stringify(newHistory));
       return newHistory;
     });
 
     try {
-      const res = await fetch(`https://ytmusc.elfar.my.id/api/search?q=${encodeURIComponent(searchTerm)}&type=video`, { mode: 'cors' });
+      const res = await fetch(`https://ytmusc.elfar.my.id/api/search?q=${encodeURIComponent(trimmed)}&type=video`, { mode: 'cors' });
       const data = await res.json();
       
       if (data.success && data.results) {
@@ -52,14 +56,8 @@ export default function Search() {
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
-      return;
+      setLastSearchedQuery("");
     }
-
-    const timer = setTimeout(() => {
-      performSearch(query);
-    }, 600);
-
-    return () => clearTimeout(timer);
   }, [query]);
 
   const removeHistory = (e: React.MouseEvent, h: string) => {
@@ -83,17 +81,31 @@ export default function Search() {
       <Sidebar />
       <main className="flex-1 overflow-y-auto p-6 md:p-10 pb-20">
         <h2 className="text-3xl font-bold mb-8">Search</h2>
-        <div className="relative mb-8 max-w-lg group">
-          <Input 
-            type="text" 
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="What do you want to listen to?" 
-            className="w-full bg-white/10 border-none rounded-full py-6 px-12 focus-visible:ring-2 focus-visible:ring-primary transition-all text-white placeholder:text-white/40"
-          />
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors">
-            <SearchIcon className="w-5 h-5" />
-          </span>
+        <div className="relative mb-8 max-w-lg group flex gap-2">
+          <div className="relative flex-1">
+            <Input 
+              type="text" 
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && performSearch(query)}
+              placeholder="What do you want to listen to?" 
+              className="w-full bg-white/10 border-none rounded-full py-6 px-12 focus-visible:ring-2 focus-visible:ring-primary transition-all text-white placeholder:text-white/40"
+            />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors">
+              <SearchIcon className="w-5 h-5" />
+            </span>
+          </div>
+          <button 
+            onClick={() => performSearch(query)}
+            disabled={loading || !query.trim()}
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white p-4 rounded-full transition-all shadow-lg flex items-center justify-center min-w-[56px]"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <SearchIcon className="w-5 h-5" />
+            )}
+          </button>
         </div>
 
         {history.length > 0 && !query && (
