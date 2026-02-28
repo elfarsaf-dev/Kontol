@@ -41,7 +41,7 @@ export default function Player() {
 
     setIsDownloading(true);
     try {
-      const res = await fetch(`https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(currentTrack.link || "")}&apikey=${encodeURIComponent(premiumKey)}`);
+      const res = await fetch(`https://ytmusc.elfar.my.id/downloader/ytmp3?link=${encodeURIComponent(currentTrack.link || "")}&apikey=${encodeURIComponent(premiumKey)}`);
       const data = await res.json();
       if (data.status === 200 && data.data?.dlink) {
         window.open(data.data.dlink, '_blank');
@@ -84,7 +84,7 @@ export default function Player() {
     try {
       // Use a known video link to validate the API key
       const testUrl = "https://youtu.be/es4WLcvl7Fc";
-      const validateUrl = `https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(testUrl)}&apikey=${encodeURIComponent(tempKey)}`;
+      const validateUrl = `https://ytmusc.elfar.my.id/downloader/ytmp3?link=${encodeURIComponent(testUrl)}&apikey=${encodeURIComponent(tempKey)}`;
       
       const res = await fetch(validateUrl);
       const data = await res.json();
@@ -122,7 +122,7 @@ export default function Player() {
       
       // Determine which API to use based on premiumKey
       const apiUrl = `https://ytmusc.elfar.my.id/api/yt-audio?url=${encodeURIComponent(videoUrl)}`;
-      const downloadApiUrl = premiumKey ? `https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(videoUrl)}&apikey=${encodeURIComponent(premiumKey)}` : null;
+      const downloadApiUrl = premiumKey ? `https://ytmusc.elfar.my.id/downloader/ytmp3?link=${encodeURIComponent(videoUrl)}&apikey=${encodeURIComponent(premiumKey)}` : null;
 
       // Gunakan AbortController untuk membatalkan fetch jika track berubah
       const controller = new AbortController();
