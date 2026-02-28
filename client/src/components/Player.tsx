@@ -19,7 +19,33 @@ export default function Player() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPremiumInput, setShowPremiumInput] = useState(false);
   const [tempKey, setTempKey] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
   const [premiumDownloadUrl, setPremiumDownloadUrl] = useState<string | null>(null);
+
+  const handleSaveKey = async () => {
+    if (!tempKey.trim()) return;
+    
+    setIsValidating(true);
+    try {
+      // Use a known video link to validate the API key
+      const testUrl = "https://youtu.be/es4WLcvl7Fc";
+      const validateUrl = `https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(testUrl)}&apikey=${encodeURIComponent(tempKey)}`;
+      
+      const res = await fetch(validateUrl);
+      const data = await res.json();
+      
+      if (data.status === 200 || data.success === true) {
+        setPremiumKey(tempKey);
+        setShowPremiumInput(false);
+      } else {
+        alert("Invalid Premium Key (Status: " + data.status + ")");
+      }
+    } catch (err) {
+      alert("Failed to validate key. Please check your internet connection.");
+    } finally {
+      setIsValidating(false);
+    }
+  };
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -198,12 +224,10 @@ export default function Player() {
                 <Button 
                   size="sm" 
                   className="h-8 text-xs bg-green-500 hover:bg-green-600 text-black"
-                  onClick={() => {
-                    setPremiumKey(tempKey);
-                    setShowPremiumInput(false);
-                  }}
+                  onClick={handleSaveKey}
+                  disabled={isValidating}
                 >
-                  Save
+                  {isValidating ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
                 </Button>
               </div>
               <a 
