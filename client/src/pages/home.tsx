@@ -11,53 +11,92 @@ export default function Home() {
   const [loadingLatest, setLoadingLatest] = useState(true);
 
   useEffect(() => {
-    // Fetch Trending from new API
-    fetch("https://ytmusc.elfar.my.id/api/trending?region=ID", { mode: 'cors' })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.results) {
-          const mappedItems = data.results.map((item: any) => {
-            const videoId = item.id;
-            return {
-              title: item.title,
-              artist: item.channel || "Unknown Artist",
-              image: item.thumbnail,
-              link: `https://www.youtube.com/watch?v=${videoId}`,
-              id: videoId
-            };
-          });
-          setTrending(mappedItems);
-        }
-        setLoadingTrending(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching trending:", err);
-        setLoadingTrending(false);
-      });
+    const CACHE_KEY_TRENDING = "trending_data_cache";
+    const CACHE_KEY_LATEST = "latest_data_cache";
+    const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
-    // Fetch Terbaru (using search for "terbaru" on new API)
-    fetch("https://ytmusc.elfar.my.id/api/search?q=music-terbaru&type=video", { mode: 'cors' })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.results) {
-          const mappedItems = data.results.map((item: any) => {
-            const videoId = item.id;
-            return {
-              title: item.title,
-              artist: item.channel || "Unknown Artist",
-              image: item.thumbnail,
-              link: `https://www.youtube.com/watch?v=${videoId}`,
-              id: videoId
-            };
-          });
-          setLatest(mappedItems);
+    const getCachedData = (key: string) => {
+      const cached = localStorage.getItem(key);
+      if (!cached) return null;
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_EXPIRY) {
+          return data;
         }
-        setLoadingLatest(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching latest:", err);
-        setLoadingLatest(false);
-      });
+      } catch (e) {
+        return null;
+      }
+      return null;
+    };
+
+    const setCachedData = (key: string, data: any) => {
+      localStorage.setItem(key, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
+    };
+
+    const cachedTrending = getCachedData(CACHE_KEY_TRENDING);
+    if (cachedTrending) {
+      setTrending(cachedTrending);
+      setLoadingTrending(false);
+    } else {
+      // Fetch Trending from new API
+      fetch("https://ytmusc.elfar.my.id/api/trending?region=ID", { mode: 'cors' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.results) {
+            const mappedItems = data.results.map((item: any) => {
+              const videoId = item.id;
+              return {
+                title: item.title,
+                artist: item.channel || "Unknown Artist",
+                image: item.thumbnail,
+                link: `https://www.youtube.com/watch?v=${videoId}`,
+                id: videoId
+              };
+            });
+            setTrending(mappedItems);
+            setCachedData(CACHE_KEY_TRENDING, mappedItems);
+          }
+          setLoadingTrending(false);
+        })
+        .catch((err) => {
+          console.error("Error fetching trending:", err);
+          setLoadingTrending(false);
+        });
+    }
+
+    const cachedLatest = getCachedData(CACHE_KEY_LATEST);
+    if (cachedLatest) {
+      setLatest(cachedLatest);
+      setLoadingLatest(false);
+    } else {
+      // Fetch Terbaru (using search for "terbaru" on new API)
+      fetch("https://ytmusc.elfar.my.id/api/search?q=music-terbaru&type=video", { mode: 'cors' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.results) {
+            const mappedItems = data.results.map((item: any) => {
+              const videoId = item.id;
+              return {
+                title: item.title,
+                artist: item.channel || "Unknown Artist",
+                image: item.thumbnail,
+                link: `https://www.youtube.com/watch?v=${videoId}`,
+                id: videoId
+              };
+            });
+            setLatest(mappedItems);
+            setCachedData(CACHE_KEY_LATEST, mappedItems);
+          }
+          setLoadingLatest(false);
+        })
+        .catch((err) => {
+          console.error("Error fetching latest:", err);
+          setLoadingLatest(false);
+        });
+    }
   }, []);
 
   const madeForYou: any[] = [];
