@@ -20,7 +20,50 @@ export default function Player() {
   const [showPremiumInput, setShowPremiumInput] = useState(false);
   const [tempKey, setTempKey] = useState("");
   const [isValidating, setIsValidating] = useState(false);
-  const [premiumDownloadUrl, setPremiumDownloadUrl] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeType, setUpgradeType] = useState<"play" | "download">("download");
+
+  const handleUpgradeRedirect = () => {
+    window.open("https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20upgrade%20ke%20Premium%20Elfar%20Tunes", "_blank");
+  };
+
+  const handleDownload = async () => {
+    if (premiumKey) {
+      try {
+        const res = await fetch(`https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(currentTrack.link || "")}&apikey=${encodeURIComponent(premiumKey)}`);
+        const data = await res.json();
+        if (data.status === 200 && data.data?.dlink) {
+          window.open(data.data.dlink, '_blank');
+        } else {
+          setUpgradeType("download");
+          setShowUpgradeModal(true);
+        }
+      } catch (err) {
+        setUpgradeType("download");
+        setShowUpgradeModal(true);
+      }
+    } else {
+      if (downloadCount < 10) {
+        if (audioUrl) {
+          window.open(audioUrl, '_blank');
+          incrementDownloadCount();
+        }
+      } else {
+        setUpgradeType("download");
+        setShowUpgradeModal(true);
+      }
+    }
+  };
+
+  const handlePlay = () => {
+    if (!canPlay() && !premiumKey) {
+      setUpgradeType("play");
+      setShowUpgradeModal(true);
+      setIsPlaying(false);
+      return false;
+    }
+    return true;
+  };
 
   const handleSaveKey = async () => {
     if (!tempKey.trim()) return;
@@ -91,20 +134,6 @@ export default function Player() {
             addToRecent({ ...currentTrack, audioUrl: url });
             if (!premiumKey) incrementPlayCount();
             if (audioRef.current) audioRef.current.load();
-            
-            // Jika premium, kita juga fetch link downloadnya di background
-            if (downloadApiUrl) {
-              fetch(downloadApiUrl)
-                .then(r => r.json())
-                .then(d => {
-                  if (d.data?.dlink) {
-                    // Simpan link download premium ke state jika perlu atau gunakan langsung di tombol
-                    // Untuk saat ini kita biarkan audioUrl tetap dari ytmucs untuk play
-                    // Tapi kita bisa simpan d.data.dlink khusus untuk tombol download
-                    setPremiumDownloadUrl(d.data.dlink);
-                  }
-                }).catch(() => {});
-            }
           } else {
             setIsPlaying(false);
           }
@@ -293,7 +322,11 @@ export default function Player() {
                   className="text-white/80 hover:text-white transition-colors transform active:scale-90"
                 ><SkipBack className="w-5 h-5 fill-current" /></button>
                 <button 
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => {
+                    if (handlePlay()) {
+                      setIsPlaying(!isPlaying);
+                    }
+                  }}
                   disabled={isLoading}
                   className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-black shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -324,12 +357,12 @@ export default function Player() {
                     {!premiumKey && (
                       <div className="space-y-0.5">
                         <div className="flex justify-between items-center px-1">
-                          <span className="text-[9px] text-white/40">Plays</span>
+                          <span className="text-[9px] text-white/40">Usage</span>
                           <span className={cn(
                             "text-[9px] font-bold",
-                            playCount >= 20 ? "text-red-500" : "text-green-500"
+                            (playCount >= 20 || downloadCount >= 10) ? "text-red-500" : "text-green-500"
                           )}>
-                            {playCount}/20
+                            P: {playCount}/20 | D: {downloadCount}/10
                           </span>
                         </div>
                       </div>
@@ -337,40 +370,17 @@ export default function Player() {
                     <div className="flex gap-1.5">
                       <Button 
                         variant="outline" 
-                        className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-1.5 rounded-md h-7 text-[10px] disabled:opacity-50"
-                        onClick={() => {
-                          if (canDownload()) {
-                            window.open(audioUrl, '_blank');
-                            if (!premiumKey) incrementDownloadCount();
-                          } else {
-                            setShowPremiumInput(true);
-                          }
-                        }}
-                        disabled={!canDownload() && !premiumKey}
+                        className={cn(
+                          "flex-1 gap-1.5 rounded-md h-7 text-[10px] font-bold transition-all",
+                          premiumKey || downloadCount >= 10 
+                            ? "bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500" 
+                            : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
+                        )}
+                        onClick={handleDownload}
                       >
-                        <Download className="w-3.5 h-3.5" />
-                        {canDownload() ? "Save" : "Limit"}
+                        {premiumKey || downloadCount >= 10 ? <Crown className="w-3 h-3" /> : <Download className="w-3.5 h-3.5" />}
+                        {premiumKey || downloadCount >= 10 ? "Premium Download" : "Save Track"}
                       </Button>
-                      {premiumKey && (
-                        <Button 
-                          variant="outline" 
-                          className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-1 rounded-md h-7 text-[10px] font-bold"
-                          onClick={() => {
-                            const finalUrl = premiumDownloadUrl || audioUrl;
-                            if (finalUrl) {
-                              const link = document.createElement('a');
-                              link.href = finalUrl;
-                              link.download = `${currentTrack.title}.mp3`;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                            }
-                          }}
-                        >
-                          <Crown className="w-3 h-3" />
-                          Download
-                        </Button>
-                      )}
                     </div>
                   </div>
                 )}
@@ -379,6 +389,42 @@ export default function Player() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-[#181818] border border-white/10 p-6 rounded-3xl max-w-sm w-full shadow-2xl scale-in-center">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                <Crown className="w-8 h-8 text-yellow-500" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-white">Upgrade ke Premium</h2>
+                <p className="text-sm text-white/60">
+                  {upgradeType === "download" 
+                    ? "Anda telah mencapai batas download gratis. Upgrade ke premium untuk akses tanpa batas!" 
+                    : "Anda telah mencapai batas putar gratis. Upgrade ke premium untuk mendengarkan sepuasnya!"}
+                </p>
+              </div>
+              <div className="flex flex-col w-full gap-2 mt-2">
+                <Button 
+                  className="bg-green-500 hover:bg-green-600 text-black font-bold h-11 rounded-xl"
+                  onClick={handleUpgradeRedirect}
+                >
+                  Hubungi WhatsApp
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="text-white/40 hover:text-white h-11"
+                  onClick={() => setShowUpgradeModal(false)}
+                >
+                  Mungkin Nanti
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
