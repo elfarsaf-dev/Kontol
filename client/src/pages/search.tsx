@@ -26,7 +26,7 @@ export default function Search() {
     });
 
     try {
-      const res = await fetch(`https://ytmusc.elfar.my.id/api/search?q=${encodeURIComponent(searchTerm)}&type=video`);
+      const res = await fetch(`https://yt-api-ten.vercel.app/api/search?q=${encodeURIComponent(searchTerm)}&type=video`);
       const data = await res.json();
       
       if (data.success && data.results) {
