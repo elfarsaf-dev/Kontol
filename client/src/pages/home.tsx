@@ -36,7 +36,7 @@ export default function Home() {
       });
 
     // Fetch Terbaru (using search for "terbaru" on new API)
-    fetch("https://ytmusc.elfar.my.id/api/search?q=terbaru&type=video", { mode: 'cors' })
+    fetch("https://ytmusc.elfar.my.id/api/search?q=music-terbaru&type=video", { mode: 'cors' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.results) {
