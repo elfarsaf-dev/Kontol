@@ -25,22 +25,37 @@ interface PlayerContextType {
   downloadCount: number;
   incrementDownloadCount: () => void;
   canDownload: () => boolean;
+  playCount: number;
+  incrementPlayCount: () => void;
+  canPlay: () => boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // Extend to 24 hours
 const MAX_FREE_DOWNLOADS = 10;
+const MAX_FREE_PLAYS = 20;
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [premiumKey, setPremiumKey] = useState<string | null>(() => localStorage.getItem("premium_key"));
+  
   const [downloadCount, setDownloadCount] = useState<number>(() => {
     const saved = localStorage.getItem("download_count_data");
     if (saved) {
       try {
         const { count, date } = JSON.parse(saved);
-        const today = new Date().toDateString();
-        if (date === today) return count;
+        if (date === new Date().toDateString()) return count;
+      } catch (e) {}
+    }
+    return 0;
+  });
+
+  const [playCount, setPlayCount] = useState<number>(() => {
+    const saved = localStorage.getItem("play_count_data");
+    if (saved) {
+      try {
+        const { count, date } = JSON.parse(saved);
+        if (date === new Date().toDateString()) return count;
       } catch (e) {}
     }
     return 0;
@@ -53,14 +68,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }));
   }, [downloadCount]);
 
-  const incrementDownloadCount = () => {
-    setDownloadCount(prev => prev + 1);
-  };
+  useEffect(() => {
+    localStorage.setItem("play_count_data", JSON.stringify({
+      count: playCount,
+      date: new Date().toDateString()
+    }));
+  }, [playCount]);
 
-  const canDownload = () => {
-    if (premiumKey) return true;
-    return downloadCount < MAX_FREE_DOWNLOADS;
-  };
+  const incrementDownloadCount = () => setDownloadCount(prev => prev + 1);
+  const incrementPlayCount = () => setPlayCount(prev => prev + 1);
+
+  const canDownload = () => premiumKey ? true : downloadCount < MAX_FREE_DOWNLOADS;
+  const canPlay = () => premiumKey ? true : playCount < MAX_FREE_PLAYS;
   const [queue, setQueue] = useState<Track[]>([]);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(() => {
     const saved = localStorage.getItem("last_track");
@@ -186,7 +205,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       setPremiumKey,
       downloadCount,
       incrementDownloadCount,
-      canDownload
+      canDownload,
+      playCount,
+      incrementPlayCount,
+      canPlay
     }}>
       {children}
     </PlayerContext.Provider>

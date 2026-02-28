@@ -10,7 +10,8 @@ export default function Player() {
   const { 
     currentTrack, isPlaying, setIsPlaying, addToRecent, playNext, 
     premiumKey, setPremiumKey, toggleLike, isLiked,
-    downloadCount, incrementDownloadCount, canDownload 
+    downloadCount, incrementDownloadCount, canDownload,
+    playCount, incrementPlayCount, canPlay 
   } = usePlayer();
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +47,13 @@ export default function Player() {
       const controller = new AbortController();
       
       const fetchAudio = async () => {
+        if (!canPlay()) {
+          setIsPlaying(false);
+          setIsLoading(false);
+          setShowPremiumInput(true);
+          return;
+        }
+        
         try {
           // Selalu fetch dari ytmucs untuk playback agar cepat
           const res = await fetch(apiUrl, { signal: controller.signal });
@@ -55,6 +63,7 @@ export default function Player() {
           if (url) {
             setAudioUrl(url);
             addToRecent({ ...currentTrack, audioUrl: url });
+            if (!premiumKey) incrementPlayCount();
             if (audioRef.current) audioRef.current.load();
             
             // Jika premium, kita juga fetch link downloadnya di background
@@ -169,9 +178,16 @@ export default function Player() {
           <div className="absolute top-[72px] left-0 right-0 p-4 bg-[#181818] border-b border-white/10 z-20 animate-in slide-in-from-top duration-300">
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-white">Premium API Key</span>
+                <span className="text-xs font-bold text-white">
+                  {!canPlay() ? "Play Limit Reached" : "Premium API Key"}
+                </span>
                 <button onClick={() => setShowPremiumInput(false)}><X className="w-4 h-4 text-white/40" /></button>
               </div>
+              {!canPlay() && (
+                <p className="text-[10px] text-white/60">
+                  Kamu sudah mencapai batas putar lagu hari ini (20 lagu). Upgrade ke Premium untuk putar sepuasnya!
+                </p>
+              )}
               <div className="flex gap-2">
                 <Input 
                   placeholder="Enter API Key..." 
@@ -296,14 +312,25 @@ export default function Player() {
                 {audioUrl && (
                   <div className="flex flex-col gap-2 w-full">
                     {!premiumKey && (
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[10px] text-white/40">Free Downloads Today</span>
-                        <span className={cn(
-                          "text-[10px] font-bold",
-                          downloadCount >= 10 ? "text-red-500" : "text-green-500"
-                        )}>
-                          {downloadCount}/10
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center px-1">
+                          <span className="text-[10px] text-white/40">Free Plays Today</span>
+                          <span className={cn(
+                            "text-[10px] font-bold",
+                            playCount >= 20 ? "text-red-500" : "text-green-500"
+                          )}>
+                            {playCount}/20
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center px-1">
+                          <span className="text-[10px] text-white/40">Free Downloads Today</span>
+                          <span className={cn(
+                            "text-[10px] font-bold",
+                            downloadCount >= 10 ? "text-red-500" : "text-green-500"
+                          )}>
+                            {downloadCount}/10
+                          </span>
+                        </div>
                       </div>
                     )}
                     <div className="flex gap-2">
