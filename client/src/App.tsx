@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Search from "@/pages/search";
 import Library from "@/pages/library";
+import Liked from "@/pages/liked";
 import NotFound from "@/pages/not-found";
 import Player from "@/components/Player";
 import { PlayerProvider } from "@/hooks/use-player";
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/search" component={Search} />
       <Route path="/library" component={Library} />
+      <Route path="/liked" component={Liked} />
       <Route component={NotFound} />
     </Switch>
   );

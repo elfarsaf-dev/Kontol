@@ -17,6 +17,7 @@ export default function Sidebar() {
     { icon: Home, label: "Home", href: "/" },
     { icon: Search, label: "Search", href: "/search" },
     { icon: Library, label: "Library", href: "/library" },
+    { icon: Heart, label: "Liked", href: "/liked" },
   ];
 
   return (
