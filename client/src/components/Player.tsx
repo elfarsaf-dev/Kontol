@@ -22,36 +22,44 @@ export default function Player() {
   const [isValidating, setIsValidating] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeType, setUpgradeType] = useState<"play" | "download">("download");
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleUpgradeRedirect = () => {
     window.open("https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20upgrade%20ke%20Premium%20Elfar%20Tunes", "_blank");
   };
 
-  const handleDownload = async () => {
-    if (premiumKey) {
-      try {
-        const res = await fetch(`https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(currentTrack.link || "")}&apikey=${encodeURIComponent(premiumKey)}`);
-        const data = await res.json();
-        if (data.status === 200 && data.data?.dlink) {
-          window.open(data.data.dlink, '_blank');
-        } else {
-          setUpgradeType("download");
-          setShowUpgradeModal(true);
-        }
-      } catch (err) {
-        setUpgradeType("download");
-        setShowUpgradeModal(true);
+  const handleDownloadPremium = async () => {
+    if (!premiumKey) {
+      setUpgradeType("download");
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      const res = await fetch(`https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(currentTrack.link || "")}&apikey=${encodeURIComponent(premiumKey)}`);
+      const data = await res.json();
+      if (data.status === 200 && data.data?.dlink) {
+        window.open(data.data.dlink, '_blank');
+      } else {
+        alert("Gagal mengambil link download premium. Pastikan API Key valid.");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan saat menghubungi server download.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleDownloadFree = () => {
+    if (downloadCount < 10) {
+      if (audioUrl) {
+        window.open(audioUrl, '_blank');
+        incrementDownloadCount();
       }
     } else {
-      if (downloadCount < 10) {
-        if (audioUrl) {
-          window.open(audioUrl, '_blank');
-          incrementDownloadCount();
-        }
-      } else {
-        setUpgradeType("download");
-        setShowUpgradeModal(true);
-      }
+      setUpgradeType("download");
+      setShowUpgradeModal(true);
     }
   };
 
@@ -370,16 +378,20 @@ export default function Player() {
                     <div className="flex gap-1.5">
                       <Button 
                         variant="outline" 
-                        className={cn(
-                          "flex-1 gap-1.5 rounded-md h-7 text-[10px] font-bold transition-all",
-                          premiumKey || downloadCount >= 10 
-                            ? "bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500" 
-                            : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
-                        )}
-                        onClick={handleDownload}
+                        className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-1.5 rounded-md h-7 text-[10px] font-medium"
+                        onClick={handleDownloadFree}
                       >
-                        {premiumKey || downloadCount >= 10 ? <Crown className="w-3 h-3" /> : <Download className="w-3.5 h-3.5" />}
-                        {premiumKey || downloadCount >= 10 ? "Premium Download" : "Save Track"}
+                        <Download className="w-3 h-3" />
+                        MP4 (Free)
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-1.5 rounded-md h-7 text-[10px] font-bold"
+                        onClick={handleDownloadPremium}
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Crown className="w-3 h-3" />}
+                        MP3 (Premium)
                       </Button>
                     </div>
                   </div>
