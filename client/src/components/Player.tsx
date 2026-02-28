@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function Player() {
-  const { currentTrack, isPlaying, setIsPlaying, addToRecent, playNext, premiumKey, setPremiumKey, toggleLike, isLiked } = usePlayer();
+  const { 
+    currentTrack, isPlaying, setIsPlaying, addToRecent, playNext, 
+    premiumKey, setPremiumKey, toggleLike, isLiked,
+    downloadCount, incrementDownloadCount, canDownload 
+  } = usePlayer();
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -290,35 +294,57 @@ export default function Player() {
                 </div>
                 
                 {audioUrl && (
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-2 rounded-lg py-4 h-8 text-xs"
-                      onClick={() => window.open(audioUrl, '_blank')}
-                    >
-                      <Download className="w-4 h-4" />
-                      Download
-                    </Button>
-                    {premiumKey && (
+                  <div className="flex flex-col gap-2 w-full">
+                    {!premiumKey && (
+                      <div className="flex justify-between items-center px-1">
+                        <span className="text-[10px] text-white/40">Free Downloads Today</span>
+                        <span className={cn(
+                          "text-[10px] font-bold",
+                          downloadCount >= 10 ? "text-red-500" : "text-green-500"
+                        )}>
+                          {downloadCount}/10
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
                       <Button 
                         variant="outline" 
-                        className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-2 rounded-lg py-4 h-8 text-xs font-bold"
+                        className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-2 rounded-lg py-4 h-8 text-xs disabled:opacity-50"
                         onClick={() => {
-                          const finalUrl = premiumDownloadUrl || audioUrl;
-                          if (finalUrl) {
-                            const link = document.createElement('a');
-                            link.href = finalUrl;
-                            link.download = `${currentTrack.title}.mp3`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
+                          if (canDownload()) {
+                            window.open(audioUrl, '_blank');
+                            if (!premiumKey) incrementDownloadCount();
+                          } else {
+                            setShowPremiumInput(true);
+                            // Optional: add toast notification here
                           }
                         }}
+                        disabled={!canDownload() && !premiumKey}
                       >
-                        <Crown className="w-3 h-3" />
-                        Download(Pro)
+                        <Download className="w-4 h-4" />
+                        {canDownload() ? "Download" : "Limit Reached"}
                       </Button>
-                    )}
+                      {premiumKey && (
+                        <Button 
+                          variant="outline" 
+                          className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-2 rounded-lg py-4 h-8 text-xs font-bold"
+                          onClick={() => {
+                            const finalUrl = premiumDownloadUrl || audioUrl;
+                            if (finalUrl) {
+                              const link = document.createElement('a');
+                              link.href = finalUrl;
+                              link.download = `${currentTrack.title}.mp3`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }
+                          }}
+                        >
+                          <Crown className="w-3 h-3" />
+                          Download(Pro)
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
