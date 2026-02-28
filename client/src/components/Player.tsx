@@ -368,7 +368,7 @@ export default function Player() {
                           }}
                         >
                           <Crown className="w-3 h-3" />
-                          Pro
+                          Download
                         </Button>
                       )}
                     </div>
