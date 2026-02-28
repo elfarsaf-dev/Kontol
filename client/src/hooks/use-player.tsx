@@ -17,6 +17,9 @@ interface PlayerContextType {
   setIsPlaying: (playing: boolean) => void;
   recentTracks: Track[];
   addToRecent: (track: Track) => void;
+  likedTracks: Track[];
+  toggleLike: (track: Track) => void;
+  isLiked: (link?: string) => boolean;
   premiumKey: string | null;
   setPremiumKey: (key: string | null) => void;
 }
@@ -53,6 +56,30 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
     return [];
   });
+
+  const [likedTracks, setLikedTracks] = useState<Track[]>(() => {
+    const saved = localStorage.getItem("liked_tracks");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("liked_tracks", JSON.stringify(likedTracks));
+  }, [likedTracks]);
+
+  const toggleLike = (track: Track) => {
+    setLikedTracks(prev => {
+      const isAlreadyLiked = prev.some(t => t.link === track.link);
+      if (isAlreadyLiked) {
+        return prev.filter(t => t.link !== track.link);
+      }
+      return [track, ...prev];
+    });
+  };
+
+  const isLiked = (link?: string) => {
+    if (!link) return false;
+    return likedTracks.some(t => t.link === link);
+  };
 
   useEffect(() => {
     localStorage.setItem("recent_tracks", JSON.stringify(recentTracks));
@@ -121,6 +148,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       setIsPlaying, 
       recentTracks, 
       addToRecent,
+      likedTracks,
+      toggleLike,
+      isLiked,
       premiumKey,
       setPremiumKey
     }}>

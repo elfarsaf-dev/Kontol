@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, Volume2, ListMusic, ChevronRight, ChevronLeft, Music, Loader2, Download, Crown, ExternalLink, X } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, Volume2, ListMusic, ChevronRight, ChevronLeft, Music, Loader2, Download, Crown, ExternalLink, X, Heart } from "lucide-react";
 import { usePlayer } from "@/hooks/use-player";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function Player() {
-  const { currentTrack, isPlaying, setIsPlaying, addToRecent, playNext, premiumKey, setPremiumKey } = usePlayer();
+  const { currentTrack, isPlaying, setIsPlaying, addToRecent, playNext, premiumKey, setPremiumKey, toggleLike, isLiked } = usePlayer();
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -211,8 +211,19 @@ export default function Player() {
           </div>
 
           {/* Info */}
-          <div className="w-full text-center space-y-1">
-            <h2 className="text-lg font-black text-white leading-tight line-clamp-1">{currentTrack.title}</h2>
+          <div className="w-full text-center space-y-1 relative">
+            <button 
+              onClick={() => toggleLike(currentTrack)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 hover:bg-white/5 rounded-full transition-colors group"
+            >
+              <Heart 
+                className={cn(
+                  "w-5 h-5 transition-all",
+                  isLiked(currentTrack.link) ? "fill-red-500 text-red-500 scale-110" : "text-white/40 group-hover:text-white"
+                )} 
+              />
+            </button>
+            <h2 className="text-lg font-black text-white leading-tight line-clamp-1 px-8">{currentTrack.title}</h2>
             <p className="text-sm text-white/60 font-medium hover:text-white transition-colors cursor-pointer">{currentTrack.artist}</p>
           </div>
 
