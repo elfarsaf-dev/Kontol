@@ -108,6 +108,18 @@ export default function Home() {
         <Hero />
         
         <div className="px-4 md:px-10 py-6 md:py-8 flex flex-col gap-8 md:gap-10">
+          <section className="sr-only">
+            <h1>Elfar Tunes - Pusat Download Lagu MP3 & Streaming Musik Indonesia</h1>
+            <p>Selamat datang di Elfar Tunes, tempat terbaik untuk download lagu MP3 gratis dan streaming musik Indonesia terbaru 2026. Temukan lagu trending TikTok, lagu galau terbaru, hingga hits mancanegara dengan kualitas audio jernih.</p>
+            <h2>Layanan Unggulan Kami:</h2>
+            <ul>
+              <li>Streaming musik tanpa gangguan iklan</li>
+              <li>Download lagu MP3 cepat dan mudah</li>
+              <li>Koleksi lagu terbaru 2026 selalu update</li>
+              <li>Playlist musik Indonesia terlengkap</li>
+            </ul>
+          </section>
+
           <section>
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="text-xl md:text-2xl font-bold tracking-tight">Trending 2026</h3>
