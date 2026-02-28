@@ -26,31 +26,19 @@ export default function Search() {
     });
 
     try {
-      const res = await fetch(`https://spotify.cocspedsafliz.workers.dev/search?q=${encodeURIComponent(searchTerm)}`);
+      const res = await fetch(`https://ytmusc.elfar.my.id/api/search?q=${encodeURIComponent(searchTerm)}&type=video`);
       const data = await res.json();
-      const items = Array.isArray(data) ? data : data.items || data.data || [];
       
-      const mappedResults = items.map((item: any) => ({
-        title: item.title || item.name,
-        artist: item.artist || item.subtitle || "Various Artists",
-        image: item.image || item.cover || item.thumbnail || "https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=400&h=400&fit=crop",
-        link: item.link || item.url || item.spotify_url
-      }));
-      
-      setResults(mappedResults);
-
-      // Background fetch for faster play
-      mappedResults.slice(0, 5).forEach(async (item: any) => {
-        if (item.link) {
-          try {
-            const r = await fetch(`https://spotify.elfar.my.id/api/spotify?link=${encodeURIComponent(item.link)}`);
-            const d = await r.json();
-            if (d.download) {
-              setResults(prev => prev.map(res => res.link === item.link ? { ...res, audioUrl: d.download } : res));
-            }
-          } catch (e) {}
-        }
-      });
+      if (data.success && data.results) {
+        const mappedResults = data.results.map((item: any) => ({
+          title: item.title,
+          artist: item.channel || "Unknown Artist",
+          image: item.thumbnail,
+          link: `https://www.youtube.com/watch?v=${item.id}`,
+          id: item.id
+        }));
+        setResults(mappedResults);
+      }
     } catch (err) {
       console.error("Search error:", err);
     } finally {

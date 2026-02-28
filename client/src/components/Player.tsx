@@ -26,16 +26,14 @@ export default function Player() {
 
       setAudioUrl(null);
       setIsLoading(true);
-      const spotifyLink = currentTrack.link;
-      if (!spotifyLink) {
+      const videoUrl = currentTrack.link;
+      if (!videoUrl) {
         setIsPlaying(false);
         setIsLoading(false);
         return;
       }
       
-      const apiUrl = premiumKey 
-        ? `https://api.ferdev.my.id/downloader/spotify?link=${encodeURIComponent(spotifyLink)}&apikey=${premiumKey}`
-        : `https://spotify.elfar.my.id/api/spotify?link=${encodeURIComponent(spotifyLink)}`;
+      const apiUrl = `https://ytmusc.elfar.my.id/api/yt-audio?url=${encodeURIComponent(videoUrl)}`;
 
       // Gunakan AbortController untuk membatalkan fetch jika track berubah
       const controller = new AbortController();
@@ -43,30 +41,11 @@ export default function Player() {
       fetch(apiUrl, { signal: controller.signal })
         .then(res => res.json())
         .then(data => {
-          if (data.success === false && data.status === 403) {
-            import("sonner").then(({ toast }) => {
-              toast.error("API Key Tidak Valid!", {
-                description: "Silahkan daftar premium di api.ferdev.my.id",
-                action: {
-                  label: "Daftar",
-                  onClick: () => window.open("https://api.ferdev.my.id/register", "_blank")
-                }
-              });
-            });
-            setPremiumKey(null); // Reset key yang salah
-            setIsPlaying(false);
-            setIsLoading(false);
-            return;
-          }
-
-          const url = data.download;
+          const url = data.stream || data.url;
           if (url) {
-            // Optimasi: Gunakan URL proxy atau pastikan server mendukung range requests
-            // Untuk prototype ini, kita set audioUrl dan paksa reload
             setAudioUrl(url);
             addToRecent({ ...currentTrack, audioUrl: url });
             
-            // Berikan sedikit delay untuk buffering awal yang lebih baik
             if (audioRef.current) {
               audioRef.current.load();
             }
@@ -84,7 +63,7 @@ export default function Player() {
 
       return () => controller.abort();
     }
-  }, [currentTrack?.link, premiumKey]);
+  }, [currentTrack?.link]);
 
   useEffect(() => {
     if (audioRef.current && audioUrl) {

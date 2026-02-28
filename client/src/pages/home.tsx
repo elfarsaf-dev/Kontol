@@ -11,64 +11,42 @@ export default function Home() {
   const [loadingLatest, setLoadingLatest] = useState(true);
 
   useEffect(() => {
-    // Fetch Trending 2026
-    fetch("https://spotify.cocspedsafliz.workers.dev/search?q=trending 2026")
+    // Fetch Trending from new API
+    fetch("https://ytmusc.elfar.my.id/api/trending?region=ID")
       .then((res) => res.json())
-      .then(async (data) => {
-        const items = Array.isArray(data) ? data : data.items || data.data || [];
-        const mappedItems = items.map((item: any) => ({
-          title: item.title || item.name,
-          artist: item.artist || item.subtitle || "Various Artists",
-          image: item.image || item.cover || item.thumbnail || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2670&auto=format&fit=crop",
-          link: item.link || item.url || item.spotify_url
-        }));
-        setTrending(mappedItems);
+      .then((data) => {
+        if (data.success && data.results) {
+          const mappedItems = data.results.map((item: any) => ({
+            title: item.title,
+            artist: item.channel || "Unknown Artist",
+            image: item.thumbnail,
+            link: `https://www.youtube.com/watch?v=${item.id}`,
+            id: item.id
+          }));
+          setTrending(mappedItems);
+        }
         setLoadingTrending(false);
-
-        // Background fetch download URLs for trending
-        mappedItems.slice(0, 5).forEach(async (item: any) => {
-          if (item.link) {
-            try {
-              const res = await fetch(`https://spotify.elfar.my.id/api/spotify?link=${encodeURIComponent(item.link)}`);
-              const d = await res.json();
-              if (d.download) {
-                setTrending(prev => prev.map(t => t.link === item.link ? { ...t, audioUrl: d.download } : t));
-              }
-            } catch (e) {}
-          }
-        });
       })
       .catch((err) => {
         console.error("Error fetching trending:", err);
         setLoadingTrending(false);
       });
 
-    // Fetch Terbaru
-    fetch("https://spotify.cocspedsafliz.workers.dev/search?q=terbaru")
+    // Fetch Terbaru (using search for "terbaru" on new API)
+    fetch("https://ytmusc.elfar.my.id/api/search?q=terbaru&type=video")
       .then((res) => res.json())
-      .then(async (data) => {
-        const items = Array.isArray(data) ? data : data.items || data.data || [];
-        const mappedItems = items.map((item: any) => ({
-          title: item.title || item.name,
-          artist: item.artist || item.subtitle || "Various Artists",
-          image: item.image || item.cover || item.thumbnail || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2670&auto=format&fit=crop",
-          link: item.link || item.url || item.spotify_url
-        }));
-        setLatest(mappedItems);
+      .then((data) => {
+        if (data.success && data.results) {
+          const mappedItems = data.results.map((item: any) => ({
+            title: item.title,
+            artist: item.channel || "Unknown Artist",
+            image: item.thumbnail,
+            link: `https://www.youtube.com/watch?v=${item.id}`,
+            id: item.id
+          }));
+          setLatest(mappedItems);
+        }
         setLoadingLatest(false);
-
-        // Background fetch download URLs for latest
-        mappedItems.slice(0, 5).forEach(async (item: any) => {
-          if (item.link) {
-            try {
-              const res = await fetch(`https://spotify.elfar.my.id/api/spotify?link=${encodeURIComponent(item.link)}`);
-              const d = await res.json();
-              if (d.download) {
-                setLatest(prev => prev.map(t => t.link === item.link ? { ...t, audioUrl: d.download } : t));
-              }
-            } catch (e) {}
-          }
-        });
       })
       .catch((err) => {
         console.error("Error fetching latest:", err);
