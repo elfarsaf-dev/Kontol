@@ -30,13 +30,16 @@ export default function Search() {
       const data = await res.json();
       
       if (data.success && data.results) {
-        const mappedResults = data.results.map((item: any) => ({
-          title: item.title,
-          artist: item.channel || "Unknown Artist",
-          image: item.thumbnail,
-          link: `https://www.youtube.com/watch?v=${item.id}`,
-          id: item.id
-        }));
+        const mappedResults = data.results.map((item: any) => {
+          const videoId = item.id;
+          return {
+            title: item.title,
+            artist: item.channel || "Unknown Artist",
+            image: item.thumbnail,
+            link: `https://www.youtube.com/watch?v=${videoId}`,
+            id: videoId
+          };
+        });
         setResults(mappedResults);
       }
     } catch (err) {

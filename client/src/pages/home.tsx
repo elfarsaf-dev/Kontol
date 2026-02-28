@@ -16,13 +16,16 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.results) {
-          const mappedItems = data.results.map((item: any) => ({
-            title: item.title,
-            artist: item.channel || "Unknown Artist",
-            image: item.thumbnail,
-            link: `https://www.youtube.com/watch?v=${item.id}`,
-            id: item.id
-          }));
+          const mappedItems = data.results.map((item: any) => {
+            const videoId = item.id;
+            return {
+              title: item.title,
+              artist: item.channel || "Unknown Artist",
+              image: item.thumbnail,
+              link: `https://www.youtube.com/watch?v=${videoId}`,
+              id: videoId
+            };
+          });
           setTrending(mappedItems);
         }
         setLoadingTrending(false);
@@ -37,13 +40,16 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.results) {
-          const mappedItems = data.results.map((item: any) => ({
-            title: item.title,
-            artist: item.channel || "Unknown Artist",
-            image: item.thumbnail,
-            link: `https://www.youtube.com/watch?v=${item.id}`,
-            id: item.id
-          }));
+          const mappedItems = data.results.map((item: any) => {
+            const videoId = item.id;
+            return {
+              title: item.title,
+              artist: item.channel || "Unknown Artist",
+              image: item.thumbnail,
+              link: `https://www.youtube.com/watch?v=${videoId}`,
+              id: videoId
+            };
+          });
           setLatest(mappedItems);
         }
         setLoadingLatest(false);
