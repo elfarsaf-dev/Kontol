@@ -14,6 +14,7 @@ export default function Player() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPremiumInput, setShowPremiumInput] = useState(false);
   const [tempKey, setTempKey] = useState("");
+  const [premiumDownloadUrl, setPremiumDownloadUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -34,41 +35,50 @@ export default function Player() {
       }
       
       // Determine which API to use based on premiumKey
-      let apiUrl = "";
-      if (premiumKey) {
-        apiUrl = `https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(videoUrl)}&apikey=${encodeURIComponent(premiumKey)}`;
-      } else {
-        apiUrl = `https://ytmusc.elfar.my.id/api/yt-audio?url=${encodeURIComponent(videoUrl)}`;
-      }
+      const apiUrl = `https://ytmusc.elfar.my.id/api/yt-audio?url=${encodeURIComponent(videoUrl)}`;
+      const downloadApiUrl = premiumKey ? `https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(videoUrl)}&apikey=${encodeURIComponent(premiumKey)}` : null;
 
       // Gunakan AbortController untuk membatalkan fetch jika track berubah
       const controller = new AbortController();
       
-      fetch(apiUrl, { signal: controller.signal })
-        .then(res => res.json())
-        .then(data => {
-          // Handle response from both APIs
-          const url = premiumKey ? (data.data?.dlink || data.data?.url) : (data.stream || data.url);
-          
+      const fetchAudio = async () => {
+        try {
+          // Selalu fetch dari ytmucs untuk playback agar cepat
+          const res = await fetch(apiUrl, { signal: controller.signal });
+          const data = await res.json();
+          const url = data.stream || data.url;
+
           if (url) {
             setAudioUrl(url);
             addToRecent({ ...currentTrack, audioUrl: url });
+            if (audioRef.current) audioRef.current.load();
             
-            if (audioRef.current) {
-              audioRef.current.load();
+            // Jika premium, kita juga fetch link downloadnya di background
+            if (downloadApiUrl) {
+              fetch(downloadApiUrl)
+                .then(r => r.json())
+                .then(d => {
+                  if (d.data?.dlink) {
+                    // Simpan link download premium ke state jika perlu atau gunakan langsung di tombol
+                    // Untuk saat ini kita biarkan audioUrl tetap dari ytmucs untuk play
+                    // Tapi kita bisa simpan d.data.dlink khusus untuk tombol download
+                    setPremiumDownloadUrl(d.data.dlink);
+                  }
+                }).catch(() => {});
             }
           } else {
             setIsPlaying(false);
           }
-          setIsLoading(false);
-        })
-        .catch(err => {
+        } catch (err: any) {
           if (err.name !== 'AbortError') {
             setIsPlaying(false);
-            setIsLoading(false);
           }
-        });
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
+      fetchAudio();
       return () => controller.abort();
     }
   }, [currentTrack?.link, premiumKey]);
@@ -283,12 +293,15 @@ export default function Player() {
                         variant="outline" 
                         className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-2 rounded-lg py-4 h-8 text-xs font-bold"
                         onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = audioUrl;
-                          link.download = `${currentTrack.title}.mp3`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          const finalUrl = premiumDownloadUrl || audioUrl;
+                          if (finalUrl) {
+                            const link = document.createElement('a');
+                            link.href = finalUrl;
+                            link.download = `${currentTrack.title}.mp3`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }
                         }}
                       >
                         <Crown className="w-3 h-3" />
