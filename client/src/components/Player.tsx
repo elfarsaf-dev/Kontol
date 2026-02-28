@@ -171,7 +171,7 @@ export default function Player() {
       {/* Right Side Panel Player */}
       <div className={cn(
         "fixed top-1/2 -translate-y-1/2 right-4 w-64 bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-3xl transition-all duration-500 z-50 flex flex-col shadow-2xl overflow-hidden",
-        isExpanded ? "h-[55vh] opacity-100 scale-100" : "h-0 opacity-0 scale-95 pointer-events-none"
+        isExpanded ? "h-[65vh] opacity-100 scale-100" : "h-0 opacity-0 scale-95 pointer-events-none"
       )}>
         {/* Header */}
         <div className="p-3 flex items-center justify-between border-b border-white/5">
