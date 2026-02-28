@@ -33,7 +33,13 @@ export default function Player() {
         return;
       }
       
-      const apiUrl = `https://ytmusc.elfar.my.id/api/yt-audio?url=${encodeURIComponent(videoUrl)}`;
+      // Determine which API to use based on premiumKey
+      let apiUrl = "";
+      if (premiumKey) {
+        apiUrl = `https://api.ferdev.my.id/downloader/ytmp3?link=${encodeURIComponent(videoUrl)}&apikey=${encodeURIComponent(premiumKey)}`;
+      } else {
+        apiUrl = `https://ytmusc.elfar.my.id/api/yt-audio?url=${encodeURIComponent(videoUrl)}`;
+      }
 
       // Gunakan AbortController untuk membatalkan fetch jika track berubah
       const controller = new AbortController();
@@ -41,7 +47,9 @@ export default function Player() {
       fetch(apiUrl, { signal: controller.signal })
         .then(res => res.json())
         .then(data => {
-          const url = data.stream || data.url;
+          // Handle response from both APIs
+          const url = premiumKey ? (data.data?.dlink || data.data?.url) : (data.stream || data.url);
+          
           if (url) {
             setAudioUrl(url);
             addToRecent({ ...currentTrack, audioUrl: url });
@@ -63,7 +71,7 @@ export default function Player() {
 
       return () => controller.abort();
     }
-  }, [currentTrack?.link]);
+  }, [currentTrack?.link, premiumKey]);
 
   useEffect(() => {
     if (audioRef.current && audioUrl) {
@@ -261,14 +269,33 @@ export default function Player() {
                 </div>
                 
                 {audioUrl && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white gap-2 rounded-lg py-4 h-8 text-xs"
-                    onClick={() => window.open(audioUrl, '_blank')}
-                  >
-                    <Download className="w-4 h-4" />
-                    Download Track
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 bg-white/5 border-white/10 hover:bg-white/10 text-white gap-2 rounded-lg py-4 h-8 text-xs"
+                      onClick={() => window.open(audioUrl, '_blank')}
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
+                    {premiumKey && (
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20 text-yellow-500 gap-2 rounded-lg py-4 h-8 text-xs font-bold"
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = audioUrl;
+                          link.download = `${currentTrack.title}.mp3`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        <Crown className="w-3 h-3" />
+                        Direct
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
