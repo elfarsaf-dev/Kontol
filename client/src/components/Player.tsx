@@ -187,7 +187,7 @@ export default function Player() {
                 </Button>
               </div>
               <a 
-                href="https://wa.me/yournumber" 
+                href="https://wa.me/6283817779643?text=Halo%2C%20saya%20ingin%20mendapatkan%20API%20Key%20Premium%20untuk%20mendownload%"
                 target="_blank" 
                 className="text-[10px] text-green-500 flex items-center gap-1 hover:underline"
               >
@@ -305,7 +305,7 @@ export default function Player() {
                         }}
                       >
                         <Crown className="w-3 h-3" />
-                        Direct
+                        Download(Pro)
                       </Button>
                     )}
                   </div>
