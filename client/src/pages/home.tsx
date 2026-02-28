@@ -12,7 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch Trending from new API
-    fetch("https://ytmusc.elfar.my.id/api/trending?region=ID")
+    fetch("https://ytmusc.elfar.my.id/api/trending?region=ID", { mode: 'cors' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.results) {
@@ -36,7 +36,7 @@ export default function Home() {
       });
 
     // Fetch Terbaru (using search for "terbaru" on new API)
-    fetch("https://ytmusc.elfar.my.id/api/search?q=terbaru&type=video")
+    fetch("https://ytmusc.elfar.my.id/api/search?q=terbaru&type=video", { mode: 'cors' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.results) {
