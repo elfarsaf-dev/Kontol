@@ -24,8 +24,12 @@ export default function Player() {
   const [upgradeType, setUpgradeType] = useState<"play" | "download">("download");
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const [selectedPackage, setSelectedPackage] = useState<"5k" | "15k">("5k");
+
   const handleUpgradeRedirect = () => {
-    window.open("https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20upgrade%20ke%20Premium%20Elfar%20Tunes", "_blank");
+    const pkgText = selectedPackage === "5k" ? "Paket Premium 5k (200/day)" : "Paket Premium 15k (Unlimited/day)";
+    const whatsappUrl = `https://wa.me/6283817779643?text=Halo%20Admin,%20saya%20ingin%20upgrade%20ke%20${encodeURIComponent(pkgText)}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleDownloadPremium = async () => {
@@ -412,18 +416,61 @@ export default function Player() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold text-white">Upgrade ke Premium</h2>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-white/60 mb-4">
                   {upgradeType === "download" 
-                    ? "Anda telah mencapai batas download gratis. Upgrade ke premium untuk akses tanpa batas!" 
-                    : "Anda telah mencapai batas putar gratis. Upgrade ke premium untuk mendengarkan sepuasnya!"}
+                    ? "Anda telah mencapai batas download gratis. Pilih paket premium untuk akses tanpa batas!" 
+                    : "Anda telah mencapai batas putar gratis. Pilih paket premium untuk mendengarkan sepuasnya!"}
                 </p>
+                
+                <div className="grid grid-cols-1 gap-3 w-full mb-6">
+                  <button 
+                    onClick={() => setSelectedPackage("5k")}
+                    className={cn(
+                      "flex items-center justify-between p-4 rounded-2xl border transition-all duration-200 text-left",
+                      selectedPackage === "5k" 
+                        ? "bg-yellow-500/20 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]" 
+                        : "bg-white/5 border-white/10 hover:border-white/20"
+                    )}
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-white">Paket Premium 5k</span>
+                      <span className="text-[11px] text-white/60">Limit 200 lagu / hari</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-sm font-black text-yellow-500">Rp 5.000</span>
+                      {selectedPackage === "5k" && <div className="w-2 h-2 rounded-full bg-yellow-500 mt-1" />}
+                    </div>
+                  </button>
+
+                  <button 
+                    onClick={() => setSelectedPackage("15k")}
+                    className={cn(
+                      "flex items-center justify-between p-4 rounded-2xl border transition-all duration-200 text-left relative overflow-hidden",
+                      selectedPackage === "15k" 
+                        ? "bg-yellow-500/20 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]" 
+                        : "bg-white/5 border-white/10 hover:border-white/20"
+                    )}
+                  >
+                    {selectedPackage === "15k" && (
+                      <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[8px] font-black px-2 py-0.5 rounded-bl-lg">BEST VALUE</div>
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-white">Paket Premium 15k</span>
+                      <span className="text-[11px] text-white/60">Tanpa Batas / Unlimited</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-sm font-black text-yellow-500">Rp 15.000</span>
+                      {selectedPackage === "15k" && <div className="w-2 h-2 rounded-full bg-yellow-500 mt-1" />}
+                    </div>
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col w-full gap-2 mt-2">
                 <Button 
-                  className="bg-green-500 hover:bg-green-600 text-black font-bold h-11 rounded-xl"
+                  className="bg-green-500 hover:bg-green-600 text-black font-black h-12 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
                   onClick={handleUpgradeRedirect}
                 >
-                  Hubungi WhatsApp
+                  Beli via WhatsApp
                 </Button>
                 <Button 
                   variant="ghost"
